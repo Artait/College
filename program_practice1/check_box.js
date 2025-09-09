@@ -1,4 +1,7 @@
-document.getElementById('showpass').addEventListener('change', function(){
+function togglePassword() {
     const password = document.getElementById('password');
-    password.type= this.checked ? 'text' : 'password';
-});
+    const showPass = document.getElementById('showpass');
+    password.type = showPass.checked ? 'text' : 'password';
+}
+
+document.getElementById('showpass').addEventListener('change', togglePassword);
