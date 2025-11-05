@@ -1,0 +1,65 @@
+/* Simple modern look */
+:root{
+  --bg: #0b1020;
+  --card:#101a34;
+  --muted:#9fb0d3;
+  --text:#e9eef9;
+  --accent:#4dabf7;
+  --ok:#20c997;
+  --bad:#ff6b6b;
+  --border:#1f2a44;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, 'Noto Sans', 'Ubuntu', Arial, sans-serif;
+  color:var(--text);
+  background: radial-gradient(1000px 700px at 10% -10%, #172b63 0%, transparent 60%) , var(--bg);
+}
+.container{max-width:960px;margin:2rem auto;padding:0 1rem}
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.0));
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  backdrop-filter: blur(6px);
+}
+.header{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem;
+}
+a, a:visited{ color:var(--accent); text-decoration:none }
+h1{margin:.2rem 0}
+nav a{margin-right:1rem}
+label{font-weight:600}
+input, select, button, textarea{ font:inherit; }
+input[type="text"], input[type="email"], input[type="password"]{
+  width:100%;
+  border:1px solid var(--border);
+  background:#0c1430;
+  color:var(--text);
+  border-radius:12px;
+  padding:.8rem 1rem;
+  outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+input:focus{border-color:var(--accent); box-shadow:0 0 0 4px rgba(77,171,247,.15)}
+.row{display:grid; grid-template-columns:1fr 1fr; gap:1rem}
+.field{display:flex; flex-direction:column; gap:.35rem; margin:.6rem 0}
+.hint{color:var(--muted); font-size:.9rem}
+.error{color:var(--bad); min-height:1rem}
+.actions{display:flex; gap:.75rem; align-items:center; margin-top:.75rem}
+button{
+  appearance:none; border:none; border-radius:12px; padding:.85rem 1.2rem; font-weight:700; cursor:pointer;
+  color:#0b1020; background: linear-gradient(180deg, #69db7c, #20c997);
+  box-shadow:0 6px 16px rgba(32,201,151,.35);
+}
+button.secondary{ color:var(--text); background: linear-gradient(180deg, #364a8a, #2b3f7a); box-shadow:0 6px 16px rgba(52,82,160,.35) }
+button.linklike{ background:none; box-shadow:none; color:var(--accent); padding:0 }
+table{ width:100%; border-collapse: collapse; margin-top:1rem; }
+th, td{ border-bottom:1px solid var(--border); padding:.6rem; text-align:left; }
+.badge{ display:inline-block; padding:.15rem .5rem; border-radius:999px; background:#0c1430; border:1px solid var(--border); color:var(--muted) }
+.footer{margin-top:1rem; color:var(--muted); text-align:center}
+.alert{ padding:.75rem 1rem; border:1px solid var(--border); background:#0c1430; border-radius:12px; margin:.75rem 0 }
+.center{ text-align:center }
+small.muted{ color:var(--muted) }

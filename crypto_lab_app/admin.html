@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Адмін — Перегляд користувачів (дешифровані дані)</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Сторінка адміністратора</h1>
+      <nav>
+        <a href="index.html">Авторизація</a>
+        <a href="admin.html">Адмін</a>
+        <a href="user.html">Користувач</a>
+      </nav>
+    </div>
+
+    <div class="card">
+      <div class="actions" style="justify-content:space-between">
+        <div>
+          <button id="refreshBtn">Оновити</button>
+          <button class="secondary" id="exportBtn">Експорт CSV</button>
+        </div>
+        <div>
+          <span class="badge" id="adminEmail"></span>
+          <button class="linklike" id="logoutBtn">Вийти</button>
+        </div>
+      </div>
+      <div id="warn" class="alert" style="display:none"></div>
+
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ім'я</th>
+            <th>Прізвище</th>
+            <th>E-mail</th>
+            <th>Зареєстровано</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <p class="hint">Дані користувачів зберігаються у <code>LocalStorage</code> у зашифрованому вигляді (AES-GCM). На цій сторінці вони дешифруються для відображення.</p>
+    </div>
+
+    <div class="footer center"><small class="muted">Навчальний приклад</small></div>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script>
+  (async () => {
+    const $ = (s)=>document.querySelector(s);
+    const session = getSession();
+    if(session.role !== "admin"){ location.href = "index.html"; return; }
+    $("#adminEmail").textContent = session.email;
+    async function render(){
+      const users = await loadUsers();
+      const tbody = $("#tbl tbody"); tbody.innerHTML = "";
+      users.forEach((u, i)=>{
+        const tr = document.createElement("tr");
+        const dt = new Date(u.registeredAt);
+        tr.innerHTML = \`
+          <td>\${i+1}</td>
+          <td>\${u.firstName}</td>
+          <td>\${u.lastName}</td>
+          <td>\${u.email}</td>
+          <td>\${dt.toLocaleString()}</td>\`;
+        tbody.appendChild(tr);
+      });
+      if(users.length === 0){ $("#warn").style.display = "block"; $("#warn").textContent = "Наразі користувачів немає."; }
+      else{ $("#warn").style.display = "none"; }
+    }
+    function toCsv(rows){
+      const esc = (s)=>(''+s).replace(/"/g,'""');
+      const lines = [["#", "Ім'я","Прізвище","E-mail","Зареєстровано"], ...rows.map((u,i)=>[i+1,u.firstName,u.lastName,u.email,new Date(u.registeredAt).toISOString()])];
+      return lines.map(r=>r.map(esc).map(x=>'"'+x+'"').join(",")).join("\n");
+    }
+    $("#refreshBtn").addEventListener("click", render);
+    $("#exportBtn").addEventListener("click", async ()=>{
+      const users = await loadUsers();
+      const csv = toCsv(users);
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = Object.assign(document.createElement("a"), {href:url, download:"users_export.csv"});
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+    $("#logoutBtn").addEventListener("click", ()=>{ clearSession(); location.href = "index.html"; });
+    await render();
+  })();
+  </script>
+</body>
+</html>

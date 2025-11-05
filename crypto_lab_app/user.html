@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Сторінка користувача — Симетричне шифрування</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Сторінка користувача</h1>
+      <nav>
+        <a href="index.html">Авторизація</a>
+        <a href="admin.html">Адмін</a>
+        <a href="user.html">Користувач</a>
+      </nav>
+    </div>
+
+    <div class="card">
+      <div class="actions" style="justify-content:space-between">
+        <span class="badge" id="userEmail"></span>
+        <button class="linklike" id="logoutBtn">Вийти</button>
+      </div>
+
+      <h2>Коротко про симетричне шифрування</h2>
+      <p>У симетричній криптографії один і той самий ключ використовується для шифрування і дешифрування.
+      Важливо зберегти цей ключ у таємниці, інакше будь-хто зможе відновити вихідні дані. Приклади алгоритмів: AES (GCM/CTR/CBC), ChaCha20.</p>
+
+      <h3>Як ми застосували це в застосунку</h3>
+      <ul>
+        <li>Під час реєстрації масив користувачів шифрується за допомогою <strong>AES-GCM 256</strong> із ключем,
+        що виводиться з навчального «мастер-паролю» методом <strong>PBKDF2</strong> (SHA-256, 250k ітерацій).</li>
+        <li>У LocalStorage зберігається лише об'єкт із <code>ct</code> (шифротекст), <code>iv</code> (ініціалізаційний вектор) і <code>salt</code> (для PBKDF2).</li>
+        <li>На цій сторінці ваші права типу «user», а таблицю з дешифрованими даними бачить тільки адміністратор.</li>
+      </ul>
+
+      <div class="alert">
+        <strong>Увага:</strong> у реальних системах ключ не зберігають на клієнті; потрібен сервер або менеджер ключів. Тут — навчальний приклад.
+      </div>
+    </div>
+
+    <div class="footer center"><small class="muted">Навчальний приклад</small></div>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script>
+  (()=>{
+    const s = getSession();
+    if(s.role !== "user"){ location.href = "index.html"; return; }
+    document.getElementById("userEmail").textContent = s.email;
+    document.getElementById("logoutBtn").addEventListener("click", ()=>{ clearSession(); location.href="index.html"; });
+  })();
+  </script>
+</body>
+</html>

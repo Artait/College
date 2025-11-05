@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Лабораторна: Шифрування даних — Авторизація/Реєстрація</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Лабораторна: Шифрування даних у web-застосунках</h1>
+      <nav>
+        <a href="index.html">Авторизація</a>
+        <a href="admin.html">Адмін</a>
+        <a href="user.html">Користувач</a>
+      </nav>
+    </div>
+
+    <div class="card">
+      <h2>Авторизація</h2>
+      <div class="row">
+        <section>
+          <div class="field">
+            <label for="loginRole">Роль</label>
+            <select id="loginRole">
+              <option value="user">Користувач</option>
+              <option value="admin">Адміністратор</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="loginEmail">E-mail</label>
+            <input id="loginEmail" type="email" placeholder="name@example.com" autocomplete="email"/>
+          </div>
+          <div class="field">
+            <label for="loginPassword">Пароль</label>
+            <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password"/>
+          </div>
+          <div class="actions">
+            <button id="loginBtn">Увійти</button>
+            <button class="secondary" id="logoutBtn">Вийти</button>
+          </div>
+          <div id="loginMsg" class="alert" style="display:none"></div>
+          <p class="hint">Демонстраційні дані адміністратора: <code>admin@dc-lab.local</code> / <code>Admin#1234</code></p>
+        </section>
+
+        <section>
+          <h3>Реєстрація нового користувача</h3>
+          <div class="row">
+            <div class="field">
+              <label for="regFirst">Ім'я</label>
+              <input id="regFirst" type="text" placeholder="Ім'я"/>
+            </div>
+            <div class="field">
+              <label for="regLast">Прізвище</label>
+              <input id="regLast" type="text" placeholder="Прізвище"/>
+            </div>
+          </div>
+          <div class="field">
+            <label for="regEmail">E-mail</label>
+            <input id="regEmail" type="email" placeholder="name@example.com"/>
+          </div>
+          <div class="field">
+            <label for="regPassword">Пароль</label>
+            <input id="regPassword" type="password" placeholder="Мінімум 8 символів"/>
+            <small class="muted">Рекомендовано: 8+ символів, великі/малі, цифри, спецсимволи</small>
+          </div>
+          <div class="actions">
+            <button id="regBtn">Зареєструвати</button>
+            <button class="secondary" id="clearUsersBtn">Очистити користувачів</button>
+          </div>
+          <div id="regMsg" class="alert" style="display:none"></div>
+        </section>
+      </div>
+      <p class="hint">Після реєстрації дані шифруються (AES-GCM) і зберігаються у LocalStorage — перевірте у вкладці <em>Application</em> в DevTools.</p>
+    </div>
+
+    <div class="footer">
+      <small class="muted">Створено для навчальних цілей — лише клієнтська частина.</small>
+    </div>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script>
+  (async () => {
+    await ensureAdminDb();
+    const $ = (s)=>document.querySelector(s);
+    const loginBtn = $("#loginBtn");
+    const logoutBtn = $("#logoutBtn");
+    const loginMsg = $("#loginMsg");
+    const regMsg = $("#regMsg");
+    function showMsg(el, msg, ok=true){
+      el.style.display = "block";
+      el.textContent = msg;
+      el.style.borderColor = ok ? "rgba(32,201,151,.5)" : "rgba(255,107,107,.5)";
+    }
+    loginBtn.addEventListener("click", async () => {
+      const role = $("#loginRole").value;
+      const email = $("#loginEmail").value.trim();
+      const pass = $("#loginPassword").value;
+      if(role === "admin"){
+        const ok = await checkAdminLogin(email, pass);
+        if(ok){ setSession({role:"admin", email}); showMsg(loginMsg, "Вхід як адміністратор успішний."); setTimeout(()=> location.href = "admin.html", 400); }
+        else{ showMsg(loginMsg, "Невірні дані адміністратора.", false); }
+        return;
+      }
+      const users = await loadUsers();
+      const u = users.find(x => x.email.toLowerCase() === email.toLowerCase());
+      if(!u){ showMsg(loginMsg, "Користувача не знайдено. Зареєструйтесь.", false); return; }
+      const ph = await sha256Hex(pass);
+      if(ph !== u.passHash){ showMsg(loginMsg, "Невірний пароль.", false); return; }
+      setSession({role:"user", email});
+      showMsg(loginMsg, "Вхід як користувач успішний.");
+      setTimeout(()=> location.href = "user.html", 400);
+    });
+    logoutBtn.addEventListener("click", () => { clearSession(); showMsg(loginMsg, "Вийшли із сесії."); });
+    $("#regBtn").addEventListener("click", async () => {
+      const first = $("#regFirst").value.trim();
+      const last  = $("#regLast").value.trim();
+      const email = $("#regEmail").value.trim();
+      const pass  = $("#regPassword").value;
+      if(!first || !last || !email || !pass){ showMsg(regMsg, "Заповніть усі поля.", false); return; }
+      if(pass.length < 8){ showMsg(regMsg, "Пароль має містити не менше 8 символів.", false); return; }
+      const users = await loadUsers();
+      if(users.some(u => u.email.toLowerCase() === email.toLowerCase())){ showMsg(regMsg, "Користувач із таким e-mail вже існує.", false); return; }
+      const passHash = await sha256Hex(pass);
+      const rec = { firstName:first, lastName:last, email, passHash, registeredAt:new Date().toISOString() };
+      users.push(rec);
+      await saveUsers(users);
+      showMsg(regMsg, "Реєстрація успішна! Дані збережено у LocalStorage (зашифровано).");
+      $("#regFirst").value = $("#regLast").value = $("#regEmail").value = $("#regPassword").value = "";
+    });
+    $("#clearUsersBtn").addEventListener("click", async () => { await saveUsers([]); showMsg(regMsg, "Список користувачів очищено."); });
+  })();
+  </script>
+</body>
+</html>
