@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Панель реєстрації / логіну — Жива валідація</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>Панель автентифікації</h1>
+      <p class="subtitle">Уведіть дані. Кнопка «Надіслати» стане активною, коли всі поля валідні.</p>
+
+      <form id="authForm" novalidate>
+        <div class="field">
+          <label for="firstName">Ім'я</label>
+          <input id="firstName" name="firstName" type="text" placeholder="Марко" autocomplete="given-name" required/>
+          <p class="hint">Починається з великої літери; лише українські або англійські літери.</p>
+          <p class="error" id="firstNameError" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="lastName">Прізвище</label>
+          <input id="lastName" name="lastName" type="text" placeholder="Шевченко" autocomplete="family-name" required/>
+          <p class="hint">Починається з великої літери; лише українські або англійські літери.</p>
+          <p class="error" id="lastNameError" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="email">Електронна пошта</label>
+          <input id="email" name="email" type="email" placeholder="name@example.com" autocomplete="email" required/>
+          <p class="hint">Формат: example@example.com</p>
+          <p class="error" id="emailError" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="password">Пароль</label>
+          <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="new-password" required/>
+          <div class="checkbox-row">
+            <input type="checkbox" id="showPassword" />
+            <label for="showPassword">Показати пароль</label>
+          </div>
+
+          <ul class="pw-rules" id="passwordRules" aria-live="polite">
+            <li data-rule="len">Мінімум 8 символів</li>
+            <li data-rule="upper">Хоча б одна велика літера</li>
+            <li data-rule="lower">Хоча б одна мала літера</li>
+            <li data-rule="digit">Хоча б одна цифра</li>
+            <li data-rule="spec">Хоча б один спецсимвол (!@#$%^&*)</li>
+          </ul>
+          <p class="error" id="passwordError" aria-live="polite"></p>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" type="submit" disabled>Надіслати</button>
+          <button id="resetBtn" type="reset" class="secondary">Очистити</button>
+        </div>
+      </form>
+    </section>
+
+    <footer class="footer">
+      <small>Лабораторна робота: Панель реєстрації з живою валідацією.</small>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
